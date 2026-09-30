@@ -1,10 +1,9 @@
 import os
 import json
 from dotenv import load_dotenv
-from typing import Literal, TypedDict, NotRequired, List
+from typing import TypedDict, NotRequired, List
 from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
-from pydantic import BaseModel, Field
 from tavily import TavilyClient
 
 load_dotenv("./.env")
@@ -116,6 +115,11 @@ graph.add_edge("format_node", END)
 if __name__ == "__main__":
     compiled_graph = graph.compile()
     print("Graph compiled successfully!")
+
+    graph_image = compiled_graph.get_graph().draw_mermaid_png()
+    with open("graph_visualization.png", "wb") as f:
+            f.write(graph_image)
+    print("Graph saved to graph_visualization.png")
 
     tests = [
         "What is artificial intelligence?",
