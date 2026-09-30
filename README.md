@@ -198,17 +198,4 @@ python rag_agent.py
 - **Tools:** Tavily (search), FAISS (vectors), HuggingFace (embeddings)
 - **Tracing:** LangSmith (optional, for debugging)
 
----
-
-## Author
-
-Built by learning LangGraph from scratch—no copy-paste. Each agent teaches one core concept.
-
-**LinkedIn:** Coming soon with demos 🚀
-
----
-
-## License
-
-MIT
 
