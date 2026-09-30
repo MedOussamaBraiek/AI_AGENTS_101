@@ -14,9 +14,6 @@ llm = ChatGroq(model="openai/gpt-oss-120b")
 
 tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
-class SearchResult(BaseModel):
-    result: str = Field(description="The result of the search")
-    resources: List[str] = Field(description="List of resources from where you answered")
 
 class GraphState(TypedDict):
     text: str
@@ -129,5 +126,6 @@ if __name__ == "__main__":
     for q in tests:
         print(f"\n=== Question: {q} ===")
         result = compiled_graph.invoke({"text": q})
-        print(f"Answer: {result['response'][:200]}...")
-        print(f"Sources: {result.get('resources', [])[:3]}")
+        print(f"\nQuery: {result['search_query']}")
+        print(f"\nAnswer: {result['response'][:200]}...")
+        print(f"\nSources: {result.get('resources', [])[:3]}")
