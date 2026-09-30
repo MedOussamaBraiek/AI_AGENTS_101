@@ -30,16 +30,8 @@ A collection of production-ready AI agents built with **LangGraph**, **LangChain
 - Graph visualization: StateGraph with conditional edges
 - Classification confidence scoring
 
-**Graph Structure:**
-```
-START → classify → [conditional routing]
-                  ├─ spam → END
-                  ├─ fyi → summarize → END
-                  └─ needs_reply/urgent → draft → interrupt → [conditional]
-                                                              ├─ approve → send → END
-                                                              ├─ edit → draft (loop)
-                                                              └─ reject → END
-```
+**Graph Visualization:**
+![Agent 1 Graph](agent-1-inbox-triage/graph_visualization.png)
 
 **Result Example:**
 ```
@@ -76,12 +68,8 @@ Human: [Approve/Edit/Reject]
 - Search: Tavily API (free tier)
 - Loop limit: 3 iterations max
 
-**Graph Structure:**
-```
-START → think → search → evaluate → [conditional]
-                                   ├─ needs_more (low score) → think (loop)
-                                   └─ done (high score) → format → END
-```
+**Graph Visualization:**
+![Agent 2 Graph](agent-2-research/graph_visualization.png)
 
 **Result Example:**
 ```
@@ -119,12 +107,8 @@ Answer: [Formatted response with 3 sources/citations]
 - Vector store: FAISS (in-memory)
 - Document loading: pdfplumber, pypdf
 
-**Graph Structure:**
-```
-START → retrieve → evaluate → [conditional]
-                             ├─ poor (grade < 0.7) → retrieve (with rewritten query)
-                             └─ good (grade ≥ 0.7) → format → END
-```
+**Graph Visualization:**
+![Agent 3 Graph](agent-3-rag/graph_visualization.png)
 
 **Result Example:**
 ```
@@ -203,28 +187,6 @@ python -m venv .venv
 pip install -r requirements.txt
 python rag_agent.py
 ```
-
----
-
-## Learning Path
-
-| Step | Concept | Agent |
-|------|---------|-------|
-| 1 | State, nodes, edges | All |
-| 2 | Structured output | Agent 1 |
-| 3 | Conditional routing | Agent 1 |
-| 4 | Human-in-the-loop | Agent 1 |
-| 5 | Tool calling | Agent 2 |
-| 6 | ReAct loop | Agent 2 |
-| 7 | Embeddings + retrieval | Agent 3 |
-| 8 | Evaluation loops | Agent 3 |
-
----
-
-## Next: Agent 4 & 5
-
-- **Agent 4:** Study Coach with short-term + long-term memory (checkpointers, stores)
-- **Agent 5:** Multi-Agent Supervisor (subgraphs, parallel routing)
 
 ---
 
