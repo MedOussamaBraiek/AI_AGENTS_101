@@ -147,6 +147,12 @@ tests = [
 if __name__ == "__main__":
     compiled_graph = graph.compile()
     print("Graph compiled successfully!")
+
+    graph_image = compiled_graph.get_graph().draw_mermaid_png()
+    with open("graph_visualization.png", "wb") as f:
+        f.write(graph_image)
+    print("Graph saved to graph_visualization.png")
+
     for i, test in enumerate(tests):
         print(f"\n=== Test {i+1} ===")
         result = compiled_graph.invoke({"text": test})
