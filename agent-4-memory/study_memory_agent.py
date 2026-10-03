@@ -87,29 +87,61 @@ def ask_question_node(state: GraphState) -> GraphState:
     }
 
 def answer_node(state: GraphState) -> GraphState:
-    """Wait for user input"""
+    """Get user answer and ask if they want to continue"""
     print(f"\n📚 Question: {state['question']}\n")
     user_answer = input("Your answer: ").strip()
     
-    return {"user_answer": user_answer}
+    cont = input("\nNext question? (y/n): ").lower()
+    should_continue = cont == 'y' or cont == 'yes'
+    
+    return {
+        "user_answer": user_answer,
+        "should_continue": should_continue
+    }
 
 def evaluate_answer_node(state: GraphState) -> GraphState:
     """Evaluate user answer"""
+
+    if not state.get("should_continue", False):
+        return {"score": 0, "explanation": "Skipped"}
 
     prompt = f"""
         Question: {state['question']}
         Answer: {state['user_answer']}
         
-        Evaluate the answer on that question and give it a score.
-        Return ONLY the score, nothing else.
+        Evaluate and score (0-100).
+        JSON: {{"score": 80, "explanation": "..."}}
         """
     result = llm.invoke(prompt).content.strip()
-    return {"score": result}
+    data = json.loads(result)
+
+    try:
+        data = json.loads(result)
+        return {
+            "score": data.get("score", 50),
+            "explanation": data.get("explanation", "")
+        }
+    except json.JSONDecodeError:
+        return {"score": 50, "explanation": "Error parsing response"}
 
 def update_profile_node(state: GraphState) -> GraphState:
-    """This node will update the user profile"""
-    store.get(("user", state['user_id'], "score_history"))
-    return state
+    """Save score and update weak topics"""
+    user_id = state['user_id']
+    score = state['score']
+    topic = state['topic']
+
+    score_history = get_store(("user", user_id, "score_history")) or []
+    score_history.append(score)
+    put_store(("user", user_id, "score_history"), score_history)
+
+    weak_topics = get_store(("user", user_id, "weak_topics")) or []
+    if score < 70 and topic not in weak_topics:
+        weak_topics.append(topic)
+    elif score > 90 and topic in weak_topics:
+        weak_topics.remove(topic)
+    put_store(("user", user_id, "weak_topics"), weak_topics)
+
+    return {"should_continue": state.get("should_continue", False)}
 
 def should_continue(state: GraphState) -> str:
     """This node will decide continue or end"""
@@ -153,7 +185,7 @@ if __name__ == "__main__":
     print("Graph saved to graph_visualization.png")
 
     result = compiled_graph.invoke(
-    {"user_id": "oussama", "question": "Test"},
+    {"user_id": "oussama"},
     config={"configurable": {"thread_id": "user_123"}}
     )
     print(result)
