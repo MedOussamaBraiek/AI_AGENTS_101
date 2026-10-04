@@ -1,3 +1,4 @@
+import json
 from dotenv import load_dotenv
 from typing import TypedDict, List
 from langchain_groq import ChatGroq
@@ -49,8 +50,44 @@ def run_letter(state):
 def approve_node(state):
     print(f"Match score: {state['match_score']}")
     print(f"Cover letter:\n{state['cover_letter']}")
+    print(f"\n\n{'='*60}\n\n")
+    print(f"Drafted Email:\n{state['draft_email']}")
     approve = input("Approve? (y/n): ").lower() == 'y'
-    return {"human_approved": approve}
+    iteration = 0
+    if approve:
+        return {"human_approved": approve}
+    while not approve and iteration < 3:
+        feedback = input("What is your feedback?").lower()
+        prompt=f"""
+        CV : {state["cv_text"]} 
+        Job : {state["job_posting"]} 
+
+        Cover letter : {state["cover_letter"]}
+        Draft Email : {state["draft_email"]}
+        Feedback : {feedback} 
+
+        Improve Cover letter or Drafted Email or both based on the feedback.
+        Return only a JSON object contains cover_letter and draft_email. 
+        """
+        result = llm.invoke(prompt).content
+        data = json.loads(result)
+        cover_letter = data["cover_letter"]
+        draft_email = data["draft_email"]
+
+        print(f"\n\n{'='*30} UPDATE {'='*30}\n\n")
+        print(f"Cover letter:\n{cover_letter}")
+        print(f"\nDraft Email:\n{draft_email}")
+        print(f"\n\n{'='*60}\n\n")
+
+        approve = input("Approve? (y/n): ").lower() == 'y'
+        iteration += 1
+
+    return {
+        "cover_letter": cover_letter,  
+        "draft_email": draft_email,   
+        "human_approved": approve
+    } 
+         
 
 
 def should_generate_letter(state):
