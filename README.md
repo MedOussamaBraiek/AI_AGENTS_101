@@ -122,6 +122,94 @@ Answer: [Formatted answer with skill categories]
 
 ---
 
+### 4️⃣ Agent 4: Study Coach with Memory
+
+**What it does:** AI tutor that quizzes users on topics, grades answers, and remembers weak spots across sessions.
+
+**Flow:**
+- Loads user profile from persistent store
+- Selects topic based on weak areas
+- Generates a quiz question (easy or hard based on past performance)
+- User answers question
+- LLM grades the answer (0-100)
+- If score < 70: adds topic to weak_topics
+- If score > 90: removes from weak_topics (mastered)
+- Human chooses to continue or quit
+- Saves progress to store
+
+**Key Concepts:**
+- ✅ Short-term memory (checkpointer for state history)
+- ✅ Long-term memory (store for user profiles)
+- ✅ Persistent state across sessions
+- ✅ Adaptive difficulty based on history
+- ✅ Progress tracking
+
+**Tech Stack:**
+- LLM: Groq
+- Memory: MemorySaver (checkpointer) + dict-based store
+- Persistence: Thread-based state snapshots
+
+**Result Example:**
+```
+Selected Topic: Recursion
+Question: What is tail recursion optimization?
+User Answer: A technique to reduce stack calls...
+Score: 85/100 ✓
+Weak Topics: [decorators, generators]
+Continue? (y/n)
+```
+
+📂 **Folder:** `agent-4-memory/`
+
+---
+
+### 5️⃣ Agent 5: Multi-Agent Job Copilot
+
+**What it does:** Matches your CV to job postings, scores the fit, generates tailored cover letters, and iterates based on user feedback.
+
+**Flow:**
+- **Parser subagent:** Extracts skills, experience, education from CV
+- **Scorer subagent:** Compares CV against job posting, scores match (0-100), identifies gaps
+- **Supervisor routing:** If score < 50, shows gaps and guides user. If score ≥ 50, generates letter
+- **Letter writer subagent:** Creates tailored cover letter + draft email addressing gaps
+- **Feedback loop:** User can request improvements, agent regenerates with feedback (max 3 iterations)
+- **Human approval:** Final sign-off before completion
+
+**Key Concepts:**
+- ✅ Multi-agent architecture with supervisor pattern
+- ✅ Subgraph orchestration
+- ✅ Conditional routing based on match score
+- ✅ Iterative refinement with user feedback
+- ✅ Context passing between agents
+- ✅ Structured JSON communication
+
+**Tech Stack:**
+- LLM: Groq
+- Pattern: Supervisor + 3 subgraphs (parser, scorer, letter)
+- Memory: Dict-based store for user profiles (future: upgrade to real Store API)
+- Manual JSON parsing with type conversion
+
+**Result Example:**
+```
+CV: Oussama Braiek (5yr Python exp, Docker, FastAPI)
+Job: Senior Python dev (need: Django, AWS, Docker, 5yr)
+Match Score: 60/100 ✅
+
+Cover Letter Generated:
+"Dear Hiring Manager, I am writing to express..."
+
+Gaps: Django, AWS
+Strengths: Python, Docker, 5 years experience
+
+User Feedback: "Update my name to Oussama Braiek, email to oussama@gmail.com"
+Regenerated Letter with feedback ✓
+Approved: Yes ✓
+```
+
+📂 **Folder:** `agent-5-multi-agent/`
+
+---
+
 ## Project Structure
 
 ```
@@ -145,7 +233,24 @@ AI_AGENTS_101/
 │   ├── .venv/
 │   ├── rag_agent.py
 │   ├── requirements.txt
-│   ├── resume_en.pdf
+│   ├── sample_doc.txt
+│   └── graph_visualization.png
+│
+├── agent-4-memory/
+│   ├── .env
+│   ├── .venv/
+│   ├── study_memory_agent.py
+│   ├── requirements.txt
+│   └── graph_visualization.png
+│
+├── agent-5-multi-agent/
+│   ├── parser_agent.py
+│   ├── scorer_agent.py
+│   ├── letter_agent.py
+│   ├── supervisor.py
+│   ├── .env
+│   ├── .venv/
+│   ├── requirements.txt
 │   └── graph_visualization.png
 │
 └── README.md (this file)
@@ -186,6 +291,24 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python rag_agent.py
+```
+
+**Agent 4: Study Coach**
+```bash
+cd agent-4-memory
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python study_memory_agent.py
+```
+
+**Agent 5: Multi-Agent Job Copilot**
+```bash
+cd agent-5-multi-agent
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python supervisor.py
 ```
 
 ---
